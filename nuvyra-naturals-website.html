@@ -1542,8 +1542,10 @@ footer{
         <h2>Get recipes, offers & restock alerts</h2>
         <p>Join our list for kitchen tips and first access to new products — no spam, just flavour.</p>
       </div>
-      <form class="cta-form" id="newsletterForm">
-        <input type="email" placeholder="Enter your email" required>
+      <form class="cta-form" id="newsletterForm" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="newsletter">
+        <p style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
+        <input type="email" name="email" placeholder="Enter your email" required>
         <button type="submit" class="btn btn-gold">Subscribe</button>
       </form>
     </div>
@@ -1829,10 +1831,24 @@ function showToast(msg){
 }
 
 /* ============ NEWSLETTER ============ */
-document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+document.getElementById('newsletterForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  showToast('🎉 Subscribed! Welcome to the Nuvyra family.');
-  e.target.reset();
+  const form = e.target;
+  try {
+    const res = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(new FormData(form)).toString(),
+    });
+    if (res.ok) {
+      showToast('🎉 Subscribed! Welcome to the Nuvyra family.');
+      form.reset();
+    } else {
+      showToast('Oops! Something went wrong. Please try again.');
+    }
+  } catch (err) {
+    showToast('Oops! Something went wrong. Please try again.');
+  }
 });
 
 /* ============ MOBILE NAV TOGGLE ============ */
